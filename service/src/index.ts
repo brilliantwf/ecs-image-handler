@@ -36,7 +36,7 @@ const lruCache = new LRUCache<string, CacheObject>({
   },
 });
 
-sharp.cache({ items: 1000, files: 200, memory: 2000 });
+sharp.cache({ items: 1000, files: 500, memory: 1024 });
 
 app.use(logger());
 app.use(errorHandler());

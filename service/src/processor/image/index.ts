@@ -189,7 +189,15 @@ export class ImageProcessor implements IProcessor {
       return { data: ctx.info, type: 'application/json' };
     } else {
       const { data, info } = await ctx.image.toBuffer({ resolveWithObject: true });
-      return { data: data, type: 'image/' + info.format };
+        // 优化：如果是 avif 格式，强制 type 为 image/avif
+        let type = 'image/' + info.format;
+        if (info.format === 'heif' && ctx.metadata.format === 'avif') {
+          type = 'image/avif';
+        }
+        if (info.format === 'avif') {
+          type = 'image/avif';
+        }
+        return { data: data, type };
     }
   }
 

@@ -11,7 +11,7 @@ export class FormatAction extends BaseImageAction {
 
   public beforeNewContext(ctx: IProcessContext, params: string[]): void {
     const opts = this.validate(params);
-    if (['webp', 'gif'].includes(opts.format)) {
+    if (['avif', 'webp', 'gif'].includes(opts.format)) {
       ctx.features[Features.ReadAllAnimatedFrames] = true;
     } else {
       ctx.features[Features.ReadAllAnimatedFrames] = false;
@@ -55,12 +55,14 @@ export class FormatAction extends BaseImageAction {
       ctx.image.jpeg();
     } else if (opt.format === 'png') {
       ctx.metadata.format = 'png';
-      ctx.image.png({ effort: 2, quality: 80 });
+      ctx.image.png({ effort: 2 });
     } else if (opt.format === 'webp') {
       ctx.metadata.format = 'webp';
-      ctx.image.webp({ effort: 2, quality: 80 });
+      ctx.image.webp({ effort: 2 });
+    } else if (opt.format === 'avif') {
+      ctx.metadata.format = 'avif';
+      ctx.image.avif({ effort: 2 });
     }
-
   }
 }
 
@@ -69,5 +71,6 @@ const SUPPORTED_FORMAT = [
   'jpeg',
   'png',
   'webp',
-  'gif',
+  'avif',
+  'gif'
 ];

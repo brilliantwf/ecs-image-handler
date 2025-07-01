@@ -9,6 +9,7 @@ import * as jpeg from './jpeg';
 const JPG = 'jpg';
 const JPEG = sharp.format.jpeg.id;
 const WEBP = sharp.format.webp.id;
+const AVIF = sharp.format.avif ? sharp.format.avif.id : 'avif';
 
 export interface QualityOpts extends IActionOpts {
   q?: number;
@@ -66,6 +67,8 @@ export class QualityAction extends BaseImageAction {
       ctx.image.jpeg({ quality: q });
     } else if (WEBP === metadata.format) {
       ctx.image.webp({ quality: (opt.q ?? opt.Q) });
+    } else if (metadata.format === 'avif' || AVIF === metadata.format) {
+      ctx.image.avif({ quality: (opt.q ?? opt.Q) });
     }
   }
 }
