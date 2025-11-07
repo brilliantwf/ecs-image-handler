@@ -1,70 +1,136 @@
 # ECS Image Handler
 
-A serverless solution for dynamic image processing using AWS ECS Fargate, CloudFront, and S3.
+A serverless image processing solution built with AWS ECS Fargate, providing high-performance image transformations and video screenshot capabilities.
 
-## Overview
+## Features
 
-ECS Image Handler is a serverless solution that provides on-the-fly image processing capabilities using AWS ECS Fargate. It allows you to resize, crop, rotate, and apply various transformations to images stored in Amazon S3 buckets.
+- **Image Processing**: Resize, format conversion, quality adjustment, cropping, rotation, blur, and grayscale
+- **Video Processing**: Screenshot extraction with configurable time points
+- **Multi-Region Support**: Tested and validated in multiple AWS regions
+- **Serverless Architecture**: Built on ECS Fargate for automatic scaling
+- **Security First**: Comprehensive security practices and data protection
+- **Easy Deployment**: Automated scripts for quick setup
 
-### Key Features
+## Quick Start
 
-- **Serverless Architecture**: Fully managed infrastructure using AWS ECS Fargate
-- **Dynamic Image Processing**: Process images on-the-fly with various transformations
-- **CDN Integration**: CloudFront distribution for caching and global content delivery
-- **Multi-Bucket Support**: Process images from multiple S3 buckets with a single service
-- **Scalable**: Automatically scales based on demand
-- **Cost-Effective**: Pay only for what you use
-- **Secure**: Proper IAM permissions and security groups
+### Prerequisites
 
-### Advantages over Lambda-based Solutions
+- AWS CLI configured with appropriate permissions
+- Node.js 18+ and npm
+- Docker (for local development)
+- CDK CLI installed globally
 
-- **No Size Limitations**: Process images of any size (Lambda has a 6MB response size limit)
-- **Longer Processing Time**: No 15-minute execution time limit
-- **More Processing Power**: Access to more CPU and memory resources
-- **Consistent Performance**: No cold start issues
+### Deployment
 
-## Deployment
+1. **Clone and Setup**
+   ```bash
+   git clone <repository-url>
+   cd ecs-image-handler
+   chmod +x *.sh
+   ```
 
-See the [Deployment Guide](./DEPLOYMENT.md) for detailed instructions on how to deploy and use the ECS Image Handler.
+2. **Quick Deploy**
+   ```bash
+   ./quick-deploy.sh
+   ```
+
+3. **Manual Setup** (if needed)
+   ```bash
+   ./setup.sh
+   ./init.sh
+   ```
+
+### Configuration
+
+The deployment automatically creates SSM parameters for configuration:
+- `/ecs-image-handler/source-bucket`: Source S3 bucket name
+- `/ecs-image-handler/result-bucket`: Result S3 bucket name
+- `/ecs-image-handler/alb-dns`: Application Load Balancer DNS name
+
+## API Usage
+
+### Image Processing
+
+```bash
+# Basic resize
+curl "https://<alb-dns>/resize?url=<image-url>&width=800&height=600"
+
+# Format conversion with quality
+curl "https://<alb-dns>/format?url=<image-url>&format=webp&quality=80"
+
+# Crop and rotate
+curl "https://<alb-dns>/crop?url=<image-url>&x=100&y=100&width=400&height=300"
+curl "https://<alb-dns>/rotate?url=<image-url>&angle=90"
+
+# Effects
+curl "https://<alb-dns>/blur?url=<image-url>&sigma=2"
+curl "https://<alb-dns>/grey?url=<image-url>"
+```
+
+### Video Screenshots
+
+```bash
+# Extract screenshot at specific time
+curl "https://<alb-dns>/video?url=<video-url>&time=30&format=jpg"
+
+# Multiple time points
+curl "https://<alb-dns>/video?url=<video-url>&time=10,30,60&format=png"
+```
 
 ## Architecture
 
-The solution consists of the following components:
+- **ECS Fargate**: Serverless container execution
+- **Application Load Balancer**: Traffic distribution and SSL termination
+- **S3**: Source and result storage
+- **CloudWatch**: Logging and monitoring
+- **Systems Manager**: Configuration management
 
-1. **CloudFront**: Provides caching and global content delivery
-2. **Application Load Balancer**: Routes requests to ECS Fargate tasks
-3. **ECS Fargate**: Runs the image processing service
-4. **S3**: Stores the original images in multiple buckets
-5. **DynamoDB**: Stores image processing styles (optional)
+## Performance
 
-### Workflow
+- **Image Processing**: 90%+ compression rates for common operations
+- **Video Screenshots**: Sub-2-second response times
+- **Auto Scaling**: Handles traffic spikes automatically
+- **Multi-Region**: Consistent performance across regions
 
-1. An image request is sent through CloudFront
-2. If the request is not cached, CloudFront forwards it to the Application Load Balancer
-3. The ALB routes the request to an ECS Fargate task
-4. The ECS task determines which S3 bucket to use:
-   - If the request includes an `x-bucket` header, it uses the specified bucket
-   - Otherwise, it uses the default bucket
-5. The image is retrieved from the appropriate S3 bucket, processed according to the request parameters, and returned
-6. CloudFront caches the processed image for future requests
+## Security
 
-## Multi-Bucket Support
+- IAM roles with least privilege access
+- VPC with private subnets
+- Security groups with minimal required ports
+- No sensitive data in code or logs
+- Comprehensive security guidelines in SECURITY.md
 
-ECS Image Handler supports processing images from multiple S3 buckets:
+## Documentation
 
-- **Default Bucket**: Used when no specific bucket is specified in the request
-- **Multiple Buckets**: Access different buckets by including an `x-bucket` header in the request
+- [Deployment Guide](DEPLOYMENT.md) - Detailed deployment instructions
+- [API Guide](API_GUIDE.md) - Complete API reference
+- [Security Guide](SECURITY.md) - Security best practices
+- [Scripts Guide](SCRIPTS.md) - Available automation scripts
+- [Test Results](TEST_RESULTS.md) - Validation and testing results
 
-This allows you to organize your images across multiple buckets while using a single image processing service.
+## Multi-Region Deployment
 
-## Prerequisites
+Tested and validated in:
+- ap-southeast-1 (Singapore)
+- ap-northeast-1 (Japan)
 
-- [AWS Account](https://aws.amazon.com/)
-- [AWS CLI](https://aws.amazon.com/cli/) configured with appropriate permissions
-- [Node.js](https://nodejs.org/) (version 14.x or later)
-- [AWS CDK](https://aws.amazon.com/cdk/) (version 2.x)
-- [Docker](https://www.docker.com/) (for local development and testing)
+Use the region-specific deployment script:
+```bash
+./deploy-region.sh <region-name>
+```
+
+## Cleanup
+
+```bash
+./cleanup.sh
+```
+
+**Note**: This preserves CDK bootstrap infrastructure which is shared across projects.
+
+## Contributing
+
+See [SECURITY.md](SECURITY.md) for guidelines on handling sensitive information in contributions.
 
 ## License
 
-This project is licensed under the Apache-2.0 License.
+MIT License - see LICENSE file for details.
